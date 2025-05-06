@@ -53,8 +53,19 @@ def replace(data: pd.DataFrame, mapping_dict: dict):
         else:
             print(f"Column '{col}' not found in DataFrame.")
 
-def encode_categorical_features(data: pd.DataFrame, encoding_dict: dict):
-    for col, mapping in encoding_dict.items():
+def encode_categorical_features(data: pd.DataFrame, value_encoding_dict: dict, onehot_encoding_list: list):
+    for col in onehot_encoding_list:
+        if col in data.columns:
+            onehot = pd.get_dummies(data[col], prefix=col)
+            data = pd.concat([data, onehot], axis=1)
+            data.drop(col, axis=1, inplace=True)
+        else:
+            print(f"Column '{col}' not found in DataFrame.")
+
+    for col, mapping in value_encoding_dict.items():
+        if col in onehot_encoding_list:
+            print(f"Column '{col}' is already one-hot encoded, skipping value encoding.")
+            continue
         if col in data.columns:
             data[col] = data[col].apply(lambda x: mapping.get(x, x))
         else:
@@ -76,36 +87,40 @@ def encode_categorical_features(data: pd.DataFrame, encoding_dict: dict):
 # }
 
 obj_col_unique_dict = {
-    'month': ['aug', 'may', 'apr', 'nov', 'jul', 'jun', 'oct', 'dec', 'sep', 'mar'],
+    'month': ['mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'],
     'day_of_week': ['mon', 'tue', 'wed', 'thu', 'fri'],
-    'education': ['professional.course', 'high.school', 'basic.9y', 'university.degree', 'unknown', 'basic.4y', 'basic.6y', 'illiterate'],
+    'education': ['illiterate', 'basic.4y', 'basic.6y', 'basic.9y', 'high.school', 'professional.course', 'university.degree', 'unknown'],
+    # 'education': ['professional.course', 'high.school', 'basic.9y', 'university.degree', 'unknown', 'basic.4y', 'basic.6y', 'illiterate'],
 
     'subscribe': ['no', 'yes'],
-    'contact': ['cellular', 'telephone'],
+    'contact':   ['telephone', 'cellular'],
 
-    'job': ['admin.', 'services', 'blue-collar', 'entrepreneur', 'management', 'technician', 'housemaid', 'self-employed', 'unemployed', 'retired', 'student', 'unknown'],
-    'marital': ['divorced', 'married', 'single', 'unknown'],
+    'job':     ['unemployed', 'student', 'retired', 'blue-collar', 'housemaid', 'services', 'admin.', 'technician', 'self-employed', 'entrepreneur', 'management', 'unknown'],
+    'marital': ['single', 'married', 'divorced', 'unknown'],
 
-    'default': ['yes', 'unknown', 'no'], 
-    'housing': ['yes', 'unknown', 'no'],
-    'loan':    ['yes', 'unknown', 'no'],
-    'poutcome': ['success', 'nonexistent', 'failure'],
+    'default':  ['no', 'unknown', 'yes'],
+    'housing':  ['no', 'unknown', 'yes'],
+    'loan':     ['no', 'unknown', 'yes'],
+    'poutcome': ['failure', 'nonexistent', 'success'],
 }
 
-encoding_dict = {
-    'job': {v: i for i, v in enumerate(obj_col_unique_dict['job'])},
-    'marital': {v: i for i, v in enumerate(obj_col_unique_dict['marital'])},
-    'education': {v: i for i, v in enumerate(obj_col_unique_dict['education'])},
-    'default': {v: i for i, v in enumerate(obj_col_unique_dict['default'])},
-    'housing': {v: i for i, v in enumerate(obj_col_unique_dict['housing'])},
-    'loan': {v: i for i, v in enumerate(obj_col_unique_dict['loan'])},
-    'contact': {v: i for i, v in enumerate(obj_col_unique_dict['contact'])},
-    'month': {v: i for i, v in enumerate(obj_col_unique_dict['month'])},
-    'day_of_week': {v: i for i, v in enumerate(obj_col_unique_dict['day_of_week'])},
-    'poutcome': {v: i for i, v in enumerate(obj_col_unique_dict['poutcome'])},
-    'subscribe': {v: i for i, v in enumerate(obj_col_unique_dict['subscribe'])}
-}
+onehot_encoding_list  = [
+    'job',
+    'marital',
+    'housing',
+    'month',
 
+    'loan',
+#  'contact',
+    'day_of_week',
+    'poutcome',
+#  'education',
+#  'default',
+]
+
+value_encoding_dict = {}
+for col, unique_values in obj_col_unique_dict.items():
+    value_encoding_dict[col] = {v: i for i, v in enumerate(obj_col_unique_dict[col])}
 
 
 
