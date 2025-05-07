@@ -67,7 +67,7 @@ data_shuffled = train_data.sample(frac=1, random_state=1)
 
 train_size = 0.9
 train_data = data_shuffled.iloc[:int(len(data_shuffled)*train_size)]
-train_data = up_sample_smote(train_data, 'subscribe', target_pos_ratio=0.2)
+train_data = up_sample_smote(train_data, 'subscribe', target_pos_ratio=0.0)
 val_data = data_shuffled.iloc[int(len(data_shuffled)*train_size):]
 X_train = train_data.drop(columns=['subscribe'])
 y_train = train_data['subscribe']
@@ -81,7 +81,8 @@ X_pred = test_data.drop(['id'], axis=1)
 
 
 
-from model import train_v1 as train
+# from model import train_v41 as train
+from model import train_v12 as train
 from eval import eval
 model = train(X_train, y_train, X_val, y_val)
 
